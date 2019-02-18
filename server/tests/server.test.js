@@ -5,10 +5,18 @@ const assert = require('assert');
 var {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
+const todos = [{
+	text: 'Work till 9:00pm'
+}, {
+	text: 'Finish Calculus Homework'
+}];
+
 beforeEach((done) => {
 	Todo.remove({}).then(() => {
+		Todo.insertMany(todos);
+	}).then(() => {
 		done();
-	})
+	});
 });
 
 describe('POST /todos', () => {
@@ -50,11 +58,24 @@ describe('POST /todos', () => {
 					return done(err);
 				}
 				Todo.find().then((todos) => {
-					assert.equal(todos.length, 0);
+					assert.equal(todos.length, 2);
 					done();
 				}).catch((err) => {
 					done(err);
 				})
 			});
-	})
+	});
 });
+
+
+describe('GET /todos', () => {
+	it('Should get all todos', (done) => {
+		request(app)
+			.get('/todos')
+			.expect(200)
+			.expect((res) => {
+				assert.equal(res.body.todos.length, 2);
+			})
+			.end(done);
+	});
+})
