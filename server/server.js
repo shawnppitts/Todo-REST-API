@@ -44,7 +44,7 @@ app.get('/todos/:id', (req, res) => {
 		{
 			return console.log(`Cannot locate todo with id of ${id}`);
 		}
-		console.log({todo});
+		res.send({todo});
 	}).catch((err) => {
 		res.status(400).send();
 	});
