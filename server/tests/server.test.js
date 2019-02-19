@@ -1,19 +1,22 @@
 const expect = require('expect');
 const request = require('supertest');
 const assert = require('assert');
+const {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 const todos = [{
-	text: 'Work till 9:00pm'
+	_id: new ObjectID(),
+	text: 'Complete Linear Algebra Homework'
 }, {
-	text: 'Finish Calculus Homework'
+	_id: new ObjectID(),
+	text: 'Workout'
 }];
 
 beforeEach((done) => {
 	Todo.remove({}).then(() => {
-		Todo.insertMany(todos);
+		return Todo.insertMany(todos);
 	}).then(() => {
 		done();
 	});
@@ -21,7 +24,7 @@ beforeEach((done) => {
 
 describe('POST /todos', () => {
 	it('Should create a new todo', (done) => {
-		var text = 'Test todo text';
+		var text = 'Get oil changed';
 
 		request(app)
 			.post('/todos')
@@ -36,8 +39,7 @@ describe('POST /todos', () => {
 				}
 
 				Todo.find().then((todos) => {
-					assert.equal(todos.length, 1);
-					assert.equal(todos[0].text, text);
+					assert.equal(todos.length, 3);
 					done();
 				}).catch((err) => {
 					done(err);
@@ -78,4 +80,26 @@ describe('GET /todos', () => {
 			})
 			.end(done);
 	});
-})
+});
+
+
+describe('GET /todos/:id', () => {
+	it('Should return todo doc', (done) => {
+		request(app)
+			// object id to string, use toHexString
+			.get(`/todos/${todos[0]._id.toHexString()}`)
+			.expect(200)
+			.expect((res) => {
+				assert.equal(res.body.todo.text, todos[0].text);
+			})
+			.end(done);
+	});
+});
+
+
+
+
+
+
+
+
